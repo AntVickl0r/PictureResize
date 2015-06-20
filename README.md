@@ -5,5 +5,5 @@ Copy the PictureResize.exe into your programs folder (or where ever you want) an
 
 Push the button to (de)activate the contextmenu entry.
 
-Then you can just right-click on any jpeg, png and gif images to start the resize window,
+Then you can just right-click on any jpeg, png and gif images and select 'Resize image' to open the resize window,
 where you can type in the new dimensions and 'save' (overwrites the old image) or 'save as...' (choose destination and filename)
