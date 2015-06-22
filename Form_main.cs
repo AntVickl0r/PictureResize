@@ -6,12 +6,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.Security.Principal;
-using System.Reflection;
-
+using System.IO;
 using Microsoft.Win32;
-
-using System.Diagnostics;
 
 namespace PictureResize
 {
@@ -20,6 +16,8 @@ namespace PictureResize
         private const string _MenuName = "\\shell\\ResizePicture_CONTEXTMENU";
         private const string _Command = "\\shell\\ResizePicture_CONTEXTMENU\\command";
 
+        private Language _language = null;
+
         private bool _active = false;
         private bool _initiated = false;
 
@@ -27,69 +25,25 @@ namespace PictureResize
         {
             if (_initiated)
             {
-                if (!IsAdmin())
+                if (!ContextMenuEntry.IsAdmin())
                 {
                     this.Hide();
-                    restartAsAdmin();
+                    ContextMenuEntry.restartAsAdmin();
                 }
                 else
                 {
-                    string[] fileTypes = new string[] { "jpegfile", "pngfile", "giffile" };
-
-                    foreach (string fileType in fileTypes)
+                    if (!_active)
                     {
-                        if (!_active)
-                        {
-                            button_activate.BackgroundImage = Properties.Resources.Button_green;
+                        button_activate.BackgroundImage = Properties.Resources.Button_green;
 
-                            RegistryKey regmenu = null;
-                            RegistryKey regcmd = null;
-                            try
-                            {
-                                regmenu = Registry.ClassesRoot.CreateSubKey(fileType + _MenuName);
-                                if (regmenu != null)
-                                    regmenu.SetValue("", Language.RESIZE_IMAGE);
-                                regcmd = Registry.ClassesRoot.CreateSubKey(fileType + _Command);
-                                if (regcmd != null)
-                                    regcmd.SetValue("", System.Reflection.Assembly.GetEntryAssembly().Location + " %1");
+                        ContextMenuEntry.activate(_language);
+                    }
+                    else
+                    {
+                        button_activate.BackgroundImage = Properties.Resources.Button_red;
 
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show(this, ex.ToString());
-                            }
-                            finally
-                            {
-                                if (regmenu != null)
-                                    regmenu.Close();
-                                if (regcmd != null)
-                                    regcmd.Close();
-                            }
-                        }
-                        else
-                        {
-                            button_activate.BackgroundImage = Properties.Resources.Button_red;
+                        ContextMenuEntry.deactivate();
 
-                            try
-                            {
-                                RegistryKey reg = Registry.ClassesRoot.OpenSubKey(fileType + _Command);
-                                if (reg != null)
-                                {
-                                    reg.Close();
-                                    Registry.ClassesRoot.DeleteSubKey(fileType + _Command);
-                                }
-                                reg = Registry.ClassesRoot.OpenSubKey(fileType + _MenuName);
-                                if (reg != null)
-                                {
-                                    reg.Close();
-                                    Registry.ClassesRoot.DeleteSubKey(fileType + _MenuName);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show(this, ex.ToString());
-                            }
-                        }
                     }
                     _active = !_active;
                 }
@@ -100,22 +54,45 @@ namespace PictureResize
 
         public Form_main(string[] args = null)
         {
+            //args = new string[] { "C:\\Users\\Michael\\Pictures\\TEST\\filesize\\nature-258140.jpg" };
+
             InitializeComponent();
+
+            try
+            {
+                _language = Language.DeserializeFromXML(AppDomain.CurrentDomain.BaseDirectory
+                    + "\\lang\\" + Properties.Settings.Default["language"] + ".xml");
+            }
+            catch
+            {
+                MessageBox.Show("Failed to load language file", "Error");
+                _language = new Language();
+                if (!File.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\lang\\EN.xml"))
+                {
+                    Language.SerializeToXML(_language, AppDomain.CurrentDomain.BaseDirectory + "\\lang\\EN.xml");
+                }
+                Properties.Settings.Default["language"] = "EN";
+            }
 
             _initiated = true;
 
-            if (args != null && args.Length > 0)
+            if (args != null && args.Length > 1)
             {
-                Form_resize form_resize = new Form_resize(args[0]);
+                Form_resize form_resize = new Form_resize(args[0], _language, args[1]);
+                form_resize.Show();
+            }
+            else if (args != null && args.Length > 0)
+            {
+                Form_resize form_resize = new Form_resize(args[0], _language);
                 form_resize.Show();
             }
             else
             {
 
-                if (!IsAdmin())
+                if (!ContextMenuEntry.IsAdmin())
                 {
                     this.Hide();
-                    restartAsAdmin();
+                    ContextMenuEntry.restartAsAdmin();
                 }
                 else
                 {
@@ -131,35 +108,6 @@ namespace PictureResize
                     }
                 }
             }
-        }
-
-
-        public static bool IsAdmin()
-        {
-            WindowsIdentity id = WindowsIdentity.GetCurrent();
-            WindowsPrincipal p = new WindowsPrincipal(id);
-            return p.IsInRole(WindowsBuiltInRole.Administrator);
-        }
-
-        public static void restartAsAdmin()
-        {
-
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.UseShellExecute = true;
-            startInfo.WorkingDirectory = Environment.CurrentDirectory;
-            startInfo.FileName = Assembly.GetExecutingAssembly().Location;
-            startInfo.Verb = "runas";
-            try
-            {
-                Process p = Process.Start(startInfo);
-                Process.GetCurrentProcess().Kill();
-            }
-            catch
-            {
-                Process.GetCurrentProcess().Kill();
-            }
-
-
         }
     }
 }

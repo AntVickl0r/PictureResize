@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Language xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <LANGUAGE>Language</LANGUAGE>
+  <LANGUAGE_NAME>English</LANGUAGE_NAME>
+  <LANGUAGE_FILENAME>EN</LANGUAGE_FILENAME>
+  <WIDTH>Width</WIDTH>
+  <HEIGHT>Height</HEIGHT>
+  <FILESIZE>File size</FILESIZE>
+  <SAVE>Save</SAVE>
+  <SAVE_AS>Save as...</SAVE_AS>
+  <WARNING>Warning!</WARNING>
+  <REALLY_OVERWRITE>Do you really want to overwrite the original file?</REALLY_OVERWRITE>
+  <RENAME>Rename?</RENAME>
+  <AUTO_RENAME>Do you want to automatically rename the file?</AUTO_RENAME>
+  <RESIZE_IMAGE>Resize image</RESIZE_IMAGE>
+</Language>

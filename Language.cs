@@ -3,22 +3,53 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using System.IO;
+using System.Xml.Serialization;
+
 namespace PictureResize
 {
-    public static class Language
+    public class Language
     {
-        //TODO create .lang xml-file loading mechanism and settings file to save chosen language
+        public static void SerializeToXML(Language language, string path)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(Language));
+            TextWriter textWriter = new StreamWriter(path);
+            serializer.Serialize(textWriter, language);
+            textWriter.Close();
+        }
+        //
+        public static Language DeserializeFromXML(string path)
+        {
+            XmlSerializer deserializer = new XmlSerializer(typeof(Language));
+            TextReader textReader = new StreamReader(path);
+            Language language;
+            language = (Language)deserializer.Deserialize(textReader);
+            textReader.Close();
+
+            return language;
+        }
+        //
+        public string LANGUAGE = "Language";
+        public string LANGUAGE_NAME = "English";
+        public string LANGUAGE_FILENAME = "EN";
         //
         //--- RESIZE FORM ---//
-        public static string WIDTH = "width";
-        public static string HEIGHT = "height";
-        public static string SAVE = "save";
-        public static string SAVE_AS = "save as...";
+        public string WIDTH = "Width";
+        public string HEIGHT = "Height";
+        public string FILESIZE = "File size";
         //
-        //--- SAVE AS DIALOG ---//
-        public static string ALL_FILES = "All files";
+        public string SAVE = "Save";
+        public string SAVE_AS = "Save as...";
+        //
+        //--- OVERWRITE DIALOG ---//
+        public string WARNING = "Warning!";
+        public string REALLY_OVERWRITE = "Do you really want to overwrite the original file?";
+        //
+        //--- RENAME DIALOG ---//
+        public string RENAME = "Rename?";
+        public string AUTO_RENAME = "Do you want to automatically rename the file?";
         //
         //--- CONTEXT MENU ---//
-        public static string RESIZE_IMAGE = "Resize image";
+        public string RESIZE_IMAGE = "Resize image";
     }
 }
